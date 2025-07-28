@@ -75,11 +75,10 @@ void ProcessInput(
 
 }
 
-void CreateBoxVao(
+void CreateLightVao(
     unsigned int &VAO, 
     float* boxVertices,
-    int numOfVertices,
-    int attributePointerIndex)
+    int numOfVertices)
 {   
     //Vertex Array Object
     glGenVertexArrays(1, &VAO); // tworzy VAO
@@ -90,17 +89,40 @@ void CreateBoxVao(
     glGenBuffers(1, &VBO); //tworzy pusty VBO
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO); //ustaw VBO jako aktywny array buffer; wszelkie rzeczy na GL_ARRAY_BUFFER będą dotyczyły obiektu VBO
-    glBufferData(GL_ARRAY_BUFFER, numOfVertices * numOfDimensionsInVertex * sizeof(float), boxVertices, GL_STATIC_DRAW); //wypełnij bufor (GPU) danymi
+    glBufferData(GL_ARRAY_BUFFER, numOfVertices * sizeof(float), boxVertices, GL_STATIC_DRAW); //wypełnij bufor (GPU) danymi
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+}
+
+void CreateBoxVao(
+    unsigned int &VAO, 
+    float* boxVertices,
+    int numOfVertices)
+{   
+    //Vertex Array Object
+    glGenVertexArrays(1, &VAO); // tworzy VAO
+    glBindVertexArray(VAO);   //aktywacja tego VAO
+    
+    //Vertex Buffer Object
+    unsigned int VBO;
+    glGenBuffers(1, &VBO); //tworzy pusty VBO
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO); //ustaw VBO jako aktywny array buffer; wszelkie rzeczy na GL_ARRAY_BUFFER będą dotyczyły obiektu VBO
+    glBufferData(GL_ARRAY_BUFFER, numOfVertices * sizeof(float), boxVertices, GL_STATIC_DRAW); //wypełnij bufor (GPU) danymi
 
     glVertexAttribPointer(
-        attributePointerIndex,  // index = location w shaderze (0 dla aPos)
+        0,  // index = location w shaderze (0 dla aPos)
         3,                      // ile wartości (vec3 → 3)
         GL_FLOAT,               // typ danych
         GL_FALSE,               // normalizacja
-        3 * sizeof(float),      // odstęp między kolejnymi atrybutami (stride)
+        6 * sizeof(float),      // odstęp między kolejnymi atrybutami (stride)
         (void*)0                // offset od początku
     );
-    glEnableVertexAttribArray(attributePointerIndex); //wybierz layout 0 jako aktywny
+    glEnableVertexAttribArray(0); //wybierz layout 0 jako aktywny
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 }
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)

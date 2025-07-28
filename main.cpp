@@ -34,14 +34,11 @@ int main(void)
     int numOfVerticesInBox = 36;
     int numOfBoxes = 4;
 
-    glm::vec3 boxPosition = glm::vec3( 3.0f, 0.0f, 0.0f);
-    glm::vec3 lightPosition = glm::vec3( -3.0f, 0.0f, 0.0f);
+    glm::vec3 boxPosition = glm::vec3( 0.0f, 0.0f, 0.0f);
+    glm::vec3 lightPosition = glm::vec3(2.2f, 2.0f, 4.0f);
 
-    int boxAttributePtrIndex = 0;
-    CreateBoxVao(boxVAO, boxVertices, numOfVerticesInBox, boxAttributePtrIndex);
-
-    int lightAttributePtrIndex = 1;
-    CreateBoxVao(lightVAO, boxVertices, numOfVerticesInBox, lightAttributePtrIndex);
+    CreateLightVao(lightVAO, boxVertices, sizeof(boxVertices));
+    CreateBoxVao(boxVAO, boxVertices, sizeof(boxVertices));
     glEnable(GL_DEPTH_TEST);
 
     std::unique_ptr<Camera> mainCamera = std::make_unique<Camera>(
@@ -57,13 +54,14 @@ int main(void)
     float farClippingPlane = 100.0f;
 
     glm::mat4 boxModelMatrix = identityMatrix;
-    glm::mat4 lightModelMatrix = identityMatrix;
+    glm::mat4 lightModelMatrix = glm::translate(identityMatrix, lightPosition); 
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = static_cast<float>(glfwGetTime());
+        float currentTime = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
@@ -72,7 +70,6 @@ int main(void)
 
         glBindVertexArray(lightVAO);
 
-        lightModelMatrix = glm::translate(identityMatrix, lightPosition); 
 
         glm::mat4 projectionMatrix = 
             glm::perspective(
@@ -82,32 +79,29 @@ int main(void)
                 farClippingPlane);
 
         lightShader.UseProgram();
-
-        unsigned int modelLocation = glGetUniformLocation(lightShader.ID, "model");
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(lightModelMatrix));
-        unsigned int viewLocation = glGetUniformLocation(lightShader.ID, "view");
-        glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(mainCamera->GetViewMatrix()));
-        unsigned int projectionLocation = glGetUniformLocation(lightShader.ID, "projection");
-        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-        unsigned int lightColorLocation = glGetUniformLocation(lightShader.ID, "lightColor");
-        glUniform3fv(lightColorLocation, 1, glm::value_ptr(lightColor));
+        
+        lightShader.SetUniformMat4("model", lightModelMatrix);
+        lightShader.SetUniformMat4("view", mainCamera->GetViewMatrix());
+        lightShader.SetUniformMat4("projection", projectionMatrix);
+        lightShader.SetUniformVec3("lightColor", lightColor);
         
         glDrawArrays(GL_TRIANGLES, 0, numOfVerticesInBox);
 
         glBindVertexArray(boxVAO);
 
-        boxModelMatrix = glm::translate(identityMatrix, boxPosition); 
+        boxModelMatrix = glm::translate(identityMatrix, boxPosition);
+        boxModelMatrix = 
+            glm::rotate(
+                boxModelMatrix, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         boxShader.UseProgram();
 
-        modelLocation = glGetUniformLocation(boxShader.ID, "model");
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(boxModelMatrix));
-        viewLocation = glGetUniformLocation(boxShader.ID, "view");
-        glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(mainCamera->GetViewMatrix()));
-        projectionLocation = glGetUniformLocation(boxShader.ID, "projection");
-        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-        lightColorLocation = glGetUniformLocation(boxShader.ID, "lightColor");
-        glUniform3fv(lightColorLocation, 1, glm::value_ptr(lightColor));
+        boxShader.SetUniformMat4("model", boxModelMatrix);
+        boxShader.SetUniformMat4("view", mainCamera->GetViewMatrix());
+        boxShader.SetUniformMat4("projection", projectionMatrix);
+        boxShader.SetUniformVec3("lightColor", lightColor);
+        boxShader.SetUniformVec3("lightPos", lightPosition);
+        boxShader.SetUniformVec3("cameraPos", mainCamera->Position);
         
         glDrawArrays(GL_TRIANGLES, 0, numOfVerticesInBox);
 
