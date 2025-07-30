@@ -99,9 +99,15 @@ int main(void)
         boxShader.SetUniformMat4("model", boxModelMatrix);
         boxShader.SetUniformMat4("view", mainCamera->GetViewMatrix());
         boxShader.SetUniformMat4("projection", projectionMatrix);
-        boxShader.SetUniformVec3("lightColor", lightColor);
-        boxShader.SetUniformVec3("lightPos", lightPosition);
         boxShader.SetUniformVec3("cameraPos", mainCamera->Position);
+        boxShader.SetUniformVec3("light.position", lightPosition);
+        boxShader.SetUniformVec3("light.ambient", lightColor * 0.1f);
+        boxShader.SetUniformVec3("light.diffuse", lightColor);
+        boxShader.SetUniformVec3("light.specular", lightColor);
+        boxShader.SetUniformVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+        boxShader.SetUniformVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+        boxShader.SetUniformVec3("material.specular", glm::vec3(lightColor * 0.5f));
+        boxShader.SetUniformFloat("material.shininess", 32.0f);
         
         glDrawArrays(GL_TRIANGLES, 0, numOfVerticesInBox);
 
