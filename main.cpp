@@ -7,7 +7,9 @@
 #include "vertices.hpp" 
 #include "camera.hpp"
 
-extern float boxVertices[];
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 const glm::mat4 identityMatrix = glm::mat4(1.0f);
 
 int main(void)
@@ -32,13 +34,12 @@ int main(void)
     Shader lightShader(lightVertexShaderPath, lightFragmentShaderPath);
 
     int numOfVerticesInBox = 36;
-    int numOfBoxes = 4;
 
-    glm::vec3 boxPosition = glm::vec3( 0.0f, 0.0f, 0.0f);
+    glm::vec3 boxPosition = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 lightPosition = glm::vec3(2.2f, 2.0f, 4.0f);
 
-    CreateLightVao(lightVAO, boxVertices, sizeof(boxVertices));
-    CreateBoxVao(boxVAO, boxVertices, sizeof(boxVertices));
+    CreateLightVao(lightVAO, lightBoxVertices, 36*6);
+    CreateBoxVao(boxVAO, boxVertices, 36*8);
     glEnable(GL_DEPTH_TEST);
 
     std::unique_ptr<Camera> mainCamera = std::make_unique<Camera>(
@@ -57,6 +58,9 @@ int main(void)
     glm::mat4 lightModelMatrix = glm::translate(identityMatrix, lightPosition); 
 
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    
+    unsigned int diffuseMap = LoadTexture("../textures/crate.png");
+    unsigned int specularMap = LoadTexture("../textures/specularMap.png");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -104,10 +108,15 @@ int main(void)
         boxShader.SetUniformVec3("light.ambient", lightColor * 0.1f);
         boxShader.SetUniformVec3("light.diffuse", lightColor);
         boxShader.SetUniformVec3("light.specular", lightColor);
-        boxShader.SetUniformVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-        boxShader.SetUniformVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-        boxShader.SetUniformVec3("material.specular", glm::vec3(lightColor * 0.5f));
+        boxShader.SetUniformInt("material.diffuse", 0);
+        boxShader.SetUniformInt("material.specular", 1);
         boxShader.SetUniformFloat("material.shininess", 32.0f);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
         
         glDrawArrays(GL_TRIANGLES, 0, numOfVerticesInBox);
 

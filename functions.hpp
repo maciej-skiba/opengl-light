@@ -15,6 +15,8 @@
 #include "shader.hpp"
 #include "camera.hpp"
 
+#include <stb_image.h>
+
 int InitializeOpenGL(GLFWwindow*& window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void ProcessInput(GLFWwindow *window, Camera *camera, float deltaTime);
@@ -26,3 +28,4 @@ void CheckShaderLink(unsigned int shaderProgram);
 void PrintArray(float* arr, int size);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+unsigned int LoadTexture(char const* path);
