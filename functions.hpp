@@ -20,8 +20,8 @@
 int InitializeOpenGL(GLFWwindow*& window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void ProcessInput(GLFWwindow *window, Camera *camera, float deltaTime);
-void CreateLightVao(unsigned int &VAO, float* boxVertices, int numOfVertices);
-void CreateBoxVao(unsigned int &VAO, float* boxVertices, int numOfVertices);
+void CreateLightVao(unsigned int &VAO, float* boxVertices, int bufferSize);
+void CreateBoxVao(unsigned int &VAO, float* boxVertices, int bufferSize);
 std::string LoadShader(const std::string& shaderPath);
 void CheckShaderCompilation(unsigned int vertexShader);
 void CheckShaderLink(unsigned int shaderProgram);

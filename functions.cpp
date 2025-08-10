@@ -4,7 +4,9 @@ int numOfDimensionsInVertex = 3;
 int amountOfVerticesInTriangle = 3;
 int amountOfCircleCenterVertices = 1;
 
+static bool fPressedLastFrame = false;
 bool firstMouseCallback = true;
+bool flashlightOn = true;
 float yaw   = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
 float pitch =  0.0f;
 float lastX =  800.0f / 2.0;
@@ -72,13 +74,21 @@ void ProcessInput(
         camera->ProcessKeyboard(Camera_Movement::DOWN,  deltaTime); 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
         camera->ProcessKeyboard(Camera_Movement::UP,  deltaTime); 
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        if (!fPressedLastFrame) {
+            flashlightOn = !flashlightOn;
+            fPressedLastFrame = true;
+        }
+    } else {
+        fPressedLastFrame = false;
+    }
 
 }
 
 void CreateLightVao(
     unsigned int &VAO, 
     float* boxVertices,
-    int numOfVertices)
+    int bufferSize)
 {   
     //Vertex Array Object
     glGenVertexArrays(1, &VAO); // tworzy VAO
@@ -89,7 +99,7 @@ void CreateLightVao(
     glGenBuffers(1, &VBO); //tworzy pusty VBO
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO); //ustaw VBO jako aktywny array buffer; wszelkie rzeczy na GL_ARRAY_BUFFER będą dotyczyły obiektu VBO
-    glBufferData(GL_ARRAY_BUFFER, numOfVertices * sizeof(float), boxVertices, GL_STATIC_DRAW); //wypełnij bufor (GPU) danymi
+    glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float), boxVertices, GL_STATIC_DRAW); //wypełnij bufor (GPU) danymi
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -98,7 +108,7 @@ void CreateLightVao(
 void CreateBoxVao(
     unsigned int &VAO, 
     float* boxVertices,
-    int numOfVertices)
+    int bufferSize)
 {   
     //Vertex Array Object
     glGenVertexArrays(1, &VAO); // tworzy VAO
@@ -109,7 +119,7 @@ void CreateBoxVao(
     glGenBuffers(1, &VBO); //tworzy pusty VBO
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO); //ustaw VBO jako aktywny array buffer; wszelkie rzeczy na GL_ARRAY_BUFFER będą dotyczyły obiektu VBO
-    glBufferData(GL_ARRAY_BUFFER, numOfVertices * sizeof(float), boxVertices, GL_STATIC_DRAW); //wypełnij bufor (GPU) danymi
+    glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float), boxVertices, GL_STATIC_DRAW); //wypełnij bufor (GPU) danymi
 
     glVertexAttribPointer(
         0,  // index = location w shaderze (0 dla aPos)
